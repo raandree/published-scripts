@@ -411,7 +411,7 @@ foreach ($job in $enableReplicationJobs) {
                 $_.TargetObjectName -eq $targetObjectName -and
                 $_.StartTime -gt $startTime } | Sort-Object StartTime -Descending | Select-Object -First 2
 
-        if (-not $irJobs -and $irJobs.Length -ne $0) {
+        if (-not $irJobs -and $irJobs.Length -ne 0) {
             $secondaryIrJob = $irJobs | Where-Object { $_.JobType -like 'SecondaryIrCompletion' }
             if (-not $secondaryIrJob -and $secondaryIrJob.Length -ge 1) {
                 $irFinished = $secondaryIrJob.State -eq 'Succeeded' -or $secondaryIrJob.State -eq 'Failed'
