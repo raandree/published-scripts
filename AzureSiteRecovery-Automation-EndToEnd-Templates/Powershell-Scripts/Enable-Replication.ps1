@@ -14,8 +14,6 @@ param(
     [string] $RecoveryTargetDiskAccountType = 'Standard_LRS'
 )
 
-$CRLF = "`r`n"
-
 # Initialize the designated output of deployment script that can be accessed by various scripts in the template.
 $DeploymentScriptOutputs = @{}
 $sourceVmARMIds = New-Object System.Collections.ArrayList
@@ -29,7 +27,7 @@ foreach ($sourceVmArmId in $sourceVmARMIds) {
 }
 Write-Output $message
 
-Write-Output $CRLF
+Write-Output ''
 
 # Setup the vault context.
 $message = 'Setting Vault context using vault {0} under resource group {1} in subscription {2}.' -f $VaultName, $VaultResourceGroupName, $VaultSubscriptionId
@@ -39,7 +37,7 @@ $vault = Get-AzRecoveryServicesVault -ResourceGroupName $VaultResourceGroupName 
 Set-AzRecoveryServicesAsrVaultContext -Vault $vault
 $message = 'Vault context set.'
 Write-Output $message
-Write-Output $CRLF
+Write-Output ''
 
 # Lookup and create replicatio fabrics if required.
 $azureFabrics = Get-ASRFabric
@@ -51,8 +49,8 @@ Foreach ($fabric in $azureFabrics) {
 # Setup the fabrics. Create if the fabrics do not already exist.
 $PrimaryRegion = $PrimaryRegion.Replace(' ', '')
 $RecoveryRegion = $RecoveryRegion.Replace(' ', '')
-$priFab = $azureFabrics | where { $_.FabricSpecificDetails.Location -like $PrimaryRegion }
-if ($priFab -eq $null) {
+$priFab = $azureFabrics | Where-Object { $_.FabricSpecificDetails.Location -like $PrimaryRegion }
+if (-not $priFab) {
     Write-Output 'Primary Fabric does not exist. Creating Primary Fabric.'
     $job = New-ASRFabric -Azure -Name $primaryRegion -Location $primaryRegion
     do {
@@ -79,8 +77,8 @@ if ($priFab -eq $null) {
     Write-Output 'Created Primary Fabric.'
 }
 
-$recFab = $azureFabrics | where { $_.FabricSpecificDetails.Location -eq $RecoveryRegion }
-if ($recFab -eq $null) {
+$recFab = $azureFabrics | Where-Object { $_.FabricSpecificDetails.Location -eq $RecoveryRegion }
+if (-not $recFab) {
     Write-Output 'Recovery Fabric does not exist. Creating Recovery Fabric.'
     $job = New-ASRFabric -Azure -Name $recoveryRegion -Location $recoveryRegion
     do {
@@ -111,14 +109,14 @@ $message = 'Primary Fabric {0}' -f $priFab.Id
 Write-Output $message
 $message = 'Recovery Fabric {0}' -f $recFab.Id
 Write-Output $message
-Write-Output $CRLF
+Write-Output ''
 
 $DeploymentScriptOutputs['PrimaryFabric'] = $priFab.Name
 $DeploymentScriptOutputs['RecoveryFabric'] = $recFab.Name
 
 # Setup the Protection Containers. Create if the protection containers do not already exist.
 $priContainer = Get-ASRProtectionContainer -Name $priFab.Name -Fabric $priFab -ErrorAction SilentlyContinue
-if ($priContainer -eq $null) {
+if (-not $priContainer) {
     Write-Output 'Primary Protection container does not exist. Creating Primary Protection Container.'
     $job = New-AzRecoveryServicesAsrProtectionContainer -Name $priFab.Name.Replace(' ', '') -Fabric $priFab
     do {
@@ -173,12 +171,11 @@ if ($recContainer -eq $null) {
     Write-Output 'Created Recovery Protection Container.'
 }
 
-
 $message = 'Primary Protection Container {0}' -f $priContainer.Id
 Write-Output $message
 $message = 'Recovery Protection Container {0}' -f $recContainer.Id
 Write-Output $message
-Write-Output $CRLF
+Write-Output ''
 
 $DeploymentScriptOutputs['PrimaryProtectionContainer'] = $priContainer.Name
 $DeploymentScriptOutputs['RecoveryProtectionContainer'] = $recContainer.Name
@@ -242,9 +239,9 @@ if ($primaryProtectionContainerMapping -eq $null) {
 }
 
 $reverseContainerMapping = Get-ASRProtectionContainerMapping -ProtectionContainer $recContainer | where { $_.TargetProtectionContainerId -like $priContainer.Id }
-if ($reverseContainerMapping -eq $null) {
+if (-not $reverseContainerMapping) {
     Write-Output 'Reverse Protection container does not already exist. Creating Reverse protection container.' 
-    if ($policy -eq $null) {
+    if (-not $policy) {
         Write-Output 'Replication policy does not already exist. Creating Replication policy.' 
         $job = New-ASRPolicy -AzureToAzure -Name $policyName -RecoveryPointRetentionInHours 1 -ApplicationConsistentSnapshotFrequencyInHours 1
         do {
@@ -300,7 +297,7 @@ if ($reverseContainerMapping -eq $null) {
 
 $message = 'Protection Container mapping {0}' -f $primaryProtectionContainerMapping.Id
 Write-Output $message
-Write-Output $CRLF
+Write-Output ''
 
 $DeploymentScriptOutputs['PrimaryProtectionContainerMapping'] = $primaryProtectionContainerMapping.Name
 $DeploymentScriptOutputs['RecoveryProtectionContainerMapping'] = $reverseContainerMapping.Name
@@ -338,7 +335,7 @@ foreach ($sourceVmArmId in $sourceVmARMIds) {
     [void]$enableReplicationJobs.Add($job)
 }
 
-Write-Output $CRLF
+Write-Output ''
 
 # Monitor each enable replication job.
 $protectedItemArmIds = New-Object System.Collections.ArrayList
@@ -372,9 +369,9 @@ foreach ($job in $enableReplicationJobs) {
     $irFinished = $false
     do {
         $irJobs = Get-ASRJob | where { $_.JobType -like '*IrCompletion' -and $_.TargetObjectName -eq $targetObjectName -and $_.StartTime -gt $startTime } | Sort-Object StartTime -Descending | select -First 2  
-        if ($irJobs -ne $null -and $irJobs.Length -ne $0) {
+        if (-not $irJobs -and $irJobs.Length -ne $0) {
             $secondaryIrJob = $irJobs | where { $_.JobType -like 'SecondaryIrCompletion' }
-            if ($secondaryIrJob -ne $null -and $secondaryIrJob.Length -ge $1) {
+            if (-not $secondaryIrJob -and $secondaryIrJob.Length -ge 1) {
                 $irFinished = $secondaryIrJob.State -eq 'Succeeded' -or $secondaryIrJob.State -eq 'Failed'
             }
             else {
@@ -396,7 +393,6 @@ foreach ($job in $enableReplicationJobs) {
     Write-Output $message
     [void]$protectedItemArmIds.Add($rpi.Id)
 }
-
 
 $DeploymentScriptOutputs['ProtectedItemArmIds'] = $protectedItemArmIds -join ','	
 
