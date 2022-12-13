@@ -1,17 +1,55 @@
 param(
-    [string] $VaultSubscriptionId,
-    [string] $VaultResourceGroupName,
-    [string] $VaultName,
-    [string] $PrimaryRegion,
-    [string] $RecoveryRegion,
-    [string] $policyName = 'A2APolicy',
-    [string] $sourceVmARMIdsCSV,
-    [string] $TargetResourceGroupId,
-    [string] $TargetVirtualNetworkId,
-    [int]    $RecoveryAvailabilityZone,
-    [string] $PrimaryStagingStorageAccount,
-    [string] $RecoveryReplicaDiskAccountType = 'Standard_LRS',
-    [string] $RecoveryTargetDiskAccountType = 'Standard_LRS'
+    [Parameter(Mandatory = $true)]
+    [string]
+    $VaultSubscriptionId,
+
+    [Parameter(Mandatory = $true)]
+    [string]
+    $VaultResourceGroupName,
+    
+    [Parameter(Mandatory = $true)]
+    [string]
+    $VaultName,
+    
+    [Parameter(Mandatory = $true)]
+    [string]
+    $PrimaryRegion,
+    
+    [Parameter(Mandatory = $true)]
+    [string]
+    $RecoveryRegion,
+
+    [Parameter()]
+    [string]
+    $policyName = 'A2APolicy',
+    
+    [Parameter(Mandatory = $true)]
+    [string]
+    $sourceVmARMIdsCSV,
+    
+    [Parameter(Mandatory = $true)]
+    [string]
+    $TargetResourceGroupId,
+    
+    [Parameter(Mandatory = $true)]
+    [string]
+    $TargetVirtualNetworkId,
+    
+    [Parameter(Mandatory = $true)]
+    [int]
+    $RecoveryAvailabilityZone,
+    
+    [Parameter(Mandatory = $true)]
+    [string]
+    $PrimaryStagingStorageAccount,
+    
+    [Parameter()]
+    [string]
+    $RecoveryReplicaDiskAccountType = 'Standard_LRS',
+    
+    [Parameter()]
+    [string]
+    $RecoveryTargetDiskAccountType = 'Standard_LRS'
 )
 
 # Initialize the designated output of deployment script that can be accessed by various scripts in the template.
@@ -144,7 +182,7 @@ if (-not $priContainer) {
 }
 
 $recContainer = Get-ASRProtectionContainer -Name "$($recFab.Name.Replace(' ', ''))-R" -Fabric $recFab -ErrorAction SilentlyContinue
-if ($recContainer -eq $null) {
+if (-not $recContainer) {
     Write-Output 'Recovery Protection container does not exist. Creating Recovery Protection Container.'
     $job = New-AzRecoveryServicesAsrProtectionContainer -Name "$($recFab.Name.Replace(' ', ''))-R" -Fabric $recFab
     do {
@@ -181,11 +219,11 @@ $DeploymentScriptOutputs['PrimaryProtectionContainer'] = $priContainer.Name
 $DeploymentScriptOutputs['RecoveryProtectionContainer'] = $recContainer.Name
 
 # Setup the protection container mapping. Create one if it does not already exist.
-$primaryProtectionContainerMapping = Get-ASRProtectionContainerMapping -ProtectionContainer $priContainer | where { $_.TargetProtectionContainerId -like $recContainer.Id }
-if ($primaryProtectionContainerMapping -eq $null) {
+$primaryProtectionContainerMapping = Get-ASRProtectionContainerMapping -ProtectionContainer $priContainer | Where-Object { $_.TargetProtectionContainerId -like $recContainer.Id }
+if (-not $primaryProtectionContainerMapping) {
     Write-Output 'Protection Container mapping does not already exist. Creating protection container.' 
     $policy = Get-ASRPolicy -Name $policyName -ErrorAction SilentlyContinue
-    if ($policy -eq $null) {
+    if (-not $policy) {
         Write-Output 'Replication policy does not already exist. Creating Replication policy.' 
         $job = New-ASRPolicy -AzureToAzure -Name $policyName -RecoveryPointRetentionInHours 1 -ApplicationConsistentSnapshotFrequencyInHours 1
         do {
@@ -238,7 +276,7 @@ if ($primaryProtectionContainerMapping -eq $null) {
     Write-Output 'Created Primary Protection Container mappings.'   
 }
 
-$reverseContainerMapping = Get-ASRProtectionContainerMapping -ProtectionContainer $recContainer | where { $_.TargetProtectionContainerId -like $priContainer.Id }
+$reverseContainerMapping = Get-ASRProtectionContainerMapping -ProtectionContainer $recContainer | Where-Object { $_.TargetProtectionContainerId -like $priContainer.Id }
 if (-not $reverseContainerMapping) {
     Write-Output 'Reverse Protection container does not already exist. Creating Reverse protection container.' 
     if (-not $policy) {
@@ -368,9 +406,13 @@ foreach ($job in $enableReplicationJobs) {
     $startTime = $job.StartTime
     $irFinished = $false
     do {
-        $irJobs = Get-ASRJob | where { $_.JobType -like '*IrCompletion' -and $_.TargetObjectName -eq $targetObjectName -and $_.StartTime -gt $startTime } | Sort-Object StartTime -Descending | select -First 2  
+        $irJobs = Get-ASRJob | 
+            Where-Object { $_.JobType -like '*IrCompletion' -and
+                $_.TargetObjectName -eq $targetObjectName -and
+                $_.StartTime -gt $startTime } | Sort-Object StartTime -Descending | Select-Object -First 2
+
         if (-not $irJobs -and $irJobs.Length -ne $0) {
-            $secondaryIrJob = $irJobs | where { $_.JobType -like 'SecondaryIrCompletion' }
+            $secondaryIrJob = $irJobs | Where-Object { $_.JobType -like 'SecondaryIrCompletion' }
             if (-not $secondaryIrJob -and $secondaryIrJob.Length -ge 1) {
                 $irFinished = $secondaryIrJob.State -eq 'Succeeded' -or $secondaryIrJob.State -eq 'Failed'
             }
