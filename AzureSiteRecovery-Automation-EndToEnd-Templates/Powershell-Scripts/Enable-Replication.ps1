@@ -70,10 +70,10 @@ Write-Output ''
 # Setup the vault context.
 $message = 'Setting Vault context using vault {0} under resource group {1} in subscription {2}.' -f $VaultName, $VaultResourceGroupName, $VaultSubscriptionId
 Write-Output $message
-Select-AzSubscription -SubscriptionId $VaultSubscriptionId
+$subscription = Select-AzSubscription -SubscriptionId $VaultSubscriptionId
 $vault = Get-AzRecoveryServicesVault -ResourceGroupName $VaultResourceGroupName -Name $VaultName
-Set-AzRecoveryServicesAsrVaultContext -Vault $vault
-$message = 'Vault context set.'
+$vaultContext = Set-AzRecoveryServicesAsrVaultContext -Vault $vault
+$message = "Vault context set to '$($vaultContext.ResourceGroupName) - $($vaultContext.ResourceName)'"
 Write-Output $message
 Write-Output ''
 
@@ -112,7 +112,7 @@ if (-not $priFab) {
         throw $message
     }
     $priFab = Get-ASRFabric -Name $primaryRegion
-    Write-Output 'Created Primary Fabric.'
+    Write-Output "Created Primary Fabric '$($priFab.Name)'."
 }
 
 $recFab = $azureFabrics | Where-Object { $_.FabricSpecificDetails.Location -eq $RecoveryRegion }
@@ -140,7 +140,7 @@ if (-not $recFab) {
         throw $message
     }
     $recFab = Get-ASRFabric -Name $RecoveryRegion
-    Write-Output 'Created Recovery Fabric.'
+    Write-Output "Created Recovery Fabric '$($recFab.Name)'."
 }
 
 $message = 'Primary Fabric {0}' -f $priFab.Id
@@ -178,7 +178,7 @@ if (-not $priContainer) {
         throw $message
     }
     $priContainer = Get-ASRProtectionContainer -Name $priFab.Name -Fabric $priFab
-    Write-Output 'Created Primary Protection Container.'
+    Write-Output "Created Primary Protection Container '$($priContainer.Name)' on primary fabric '$($priFab.Name)'."
 }
 
 $recContainer = Get-ASRProtectionContainer -Name "$($recFab.Name.Replace(' ', ''))-R" -Fabric $recFab -ErrorAction SilentlyContinue
@@ -206,7 +206,7 @@ if (-not $recContainer) {
         throw $message
     }
     $recContainer = Get-ASRProtectionContainer -Name $recFab.Name -Fabric $recFab
-    Write-Output 'Created Recovery Protection Container.'
+    Write-Output "Created Recovery Protection Container '$($recContainer.Name)' on primary fabric '$($recFab.Name)'."
 }
 
 $message = 'Primary Protection Container {0}' -f $priContainer.Id
@@ -247,7 +247,7 @@ if (-not $primaryProtectionContainerMapping) {
             throw $message
         }
         $policy = Get-ASRPolicy -Name $policyName
-        Write-Output 'Created Replication policy.' 
+        Write-Output "Created Replication policy '$($policy.Name)' on replication provider '$($policy.ReplicationProvider)'."
     }
 
     $protectionContainerMappingName = $priContainer.Name + 'To' + $recContainer.Name
@@ -273,7 +273,7 @@ if (-not $primaryProtectionContainerMapping) {
         throw $message
     }	
     $primaryProtectionContainerMapping = Get-ASRProtectionContainerMapping -Name $protectionContainerMappingName -ProtectionContainer $priContainer
-    Write-Output 'Created Primary Protection Container mappings.'   
+    Write-Output "Created Primary Protection Container mappings: '$($primaryProtectionContainerMapping.Name)', Source '$($primaryProtectionContainerMapping.SourceFabricFriendlyName)' - Target '$($primaryProtectionContainerMapping.TargetFabricFriendlyName)'."
 }
 
 $reverseContainerMapping = Get-ASRProtectionContainerMapping -ProtectionContainer $recContainer | Where-Object { $_.TargetProtectionContainerId -like $priContainer.Id }
@@ -330,7 +330,7 @@ if (-not $reverseContainerMapping) {
         throw $message
     }	
     $reverseContainerMapping = Get-ASRProtectionContainerMapping -Name $protectionContainerMappingName -ProtectionContainer $recContainer    
-    Write-Output 'Created Recovery Protection Container mappings.'
+    Write-Output "Created Recovery Protection Container mappings: '$($reverseContainerMapping.Name)', Source '$($reverseContainerMapping.SourceFabricFriendlyName)' - Target '$($reverseContainerMapping.TargetFabricFriendlyName)'."
 }
 
 $message = 'Protection Container mapping {0}' -f $primaryProtectionContainerMapping.Id
@@ -400,8 +400,7 @@ foreach ($job in $enableReplicationJobs) {
         throw $message
     }
     $targetObjectName = $job.TargetObjectName
-    $message = 'Enable protection completed for {0}. Waiting for IR.' -f $targetObjectName
-    Write-Output $message
+    Write-Output "Enable protection completed for '$($targetObjectName). Waiting for IR."
 	
     $startTime = $job.StartTime
     $irFinished = $false
