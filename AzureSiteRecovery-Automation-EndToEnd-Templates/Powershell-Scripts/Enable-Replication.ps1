@@ -399,24 +399,24 @@ foreach ($job in $enableReplicationJobs) {
         }
     }
     $targetObjectName = $job.TargetObjectName
-    Write-Output "Enable protection completed for '$($targetObjectName). Waiting for IR."
+    Write-Output "Enable protection completed for '$($targetObjectName)'. Waiting for IR."
 	
     if (-not $replicationAlreadyEnabled) {
         $startTime = $job.StartTime
         $irFinished = $false
         do {
-            $irJobs = Get-ASRJob | Where-Object { $_.JobType -like '*IrCompletion' -and
+            $irJobs = Get-ASRJob | Where-Object { $_.JobType -eq 'PrimaryIrCompletion' -and
                 $_.TargetObjectName -eq $targetObjectName -and
                 $_.StartTime -gt $startTime } |
-                Sort-Object StartTime -Descending | Select-Object -First 2  
+                Sort-Object StartTime -Descending | Select-Object -First 1  
             if ($irJobs) {
                 $secondaryIrJob = $irJobs | Where-Object { $_.JobType -eq 'SecondaryIrCompletion' }
                 
-                if (-not $secondaryIrJob -and $secondaryIrJob.Length -ge 1) {
+                if ($secondaryIrJob -and $secondaryIrJob.Length -ge 1) {
                     $irFinished = $secondaryIrJob.State -eq 'Succeeded' -or $secondaryIrJob.State -eq 'Failed'
                 }
                 else {
-                    $irFinished = $irJobs.State -eq 'Failed'
+                    $irFinished = $irJobs.State -eq 'Failed' -or $irJobs.State -eq 'Succeeded'
                 }
             }
 	
