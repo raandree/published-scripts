@@ -59,7 +59,7 @@ foreach ($sourceId in $sourceVmARMIdsCSV.Split(',')) {
     [void]$sourceVmARMIds.Add($sourceId.Trim())
 }
 
-$message = 'Enable replication will be triggered for following {0} VMs' -f $sourceVmARMIds.Count
+$message = "Enable replication will be triggered for following $($sourceVmARMIds.Count) VMs"
 foreach ($sourceVmArmId in $sourceVmARMIds) {
     $message += "`n $sourceVmARMId"
 }
@@ -68,20 +68,18 @@ Write-Output $message
 Write-Output ''
 
 # Setup the vault context.
-$message = 'Setting Vault context using vault {0} under resource group {1} in subscription {2}.' -f $VaultName, $VaultResourceGroupName, $VaultSubscriptionId
-Write-Output $message
+Write-Output "Setting Vault context using vault '$VaultName' under resource group '$VaultResourceGroupName' in subscription '$VaultSubscriptionId'."
 $subscription = Select-AzSubscription -SubscriptionId $VaultSubscriptionId
 $vault = Get-AzRecoveryServicesVault -ResourceGroupName $VaultResourceGroupName -Name $VaultName
 $vaultContext = Set-AzRecoveryServicesAsrVaultContext -Vault $vault
-$message = "Vault context set to '$($vaultContext.ResourceGroupName) - $($vaultContext.ResourceName)'"
-Write-Output $message
+
+Write-Output "Vault context set to '$($vaultContext.ResourceGroupName) - $($vaultContext.ResourceName)'"
 Write-Output ''
 
 # Lookup and create replicatio fabrics if required.
 $azureFabrics = Get-ASRFabric
 Foreach ($fabric in $azureFabrics) {
-    $message = 'Fabric {0} in location {1}.' -f $fabric.Name, $fabric.FabricSpecificDetails.Location
-    Write-Output $message
+    Write-Output "Fabric '$($fabric.Name)' in location '$($fabric.FabricSpecificDetails.Location)'."
 }
 
 # Setup the fabrics. Create if the fabrics do not already exist.
@@ -97,7 +95,7 @@ if (-not $priFab) {
     } while ($job.State -ne 'Succeeded' -and $job.State -ne 'Failed' -and $job.State -ne 'CompletedWithInformation')
 
     if ($job.State -eq 'Failed') {
-        $message = 'Job {0} failed for {1}' -f $job.DisplayName, $job.TargetObjectName
+        $message = "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
         Write-Output $message
         foreach ($er in $job.Errors) {
             foreach ($pe in $er.ProviderErrorDetails) {
@@ -125,7 +123,7 @@ if (-not $recFab) {
     } while ($job.State -ne 'Succeeded' -and $job.State -ne 'Failed' -and $job.State -ne 'CompletedWithInformation')
 
     if ($job.State -eq 'Failed') {
-        $message = 'Job {0} failed for {1}' -f $job.DisplayName, $job.TargetObjectName
+        $message = "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
         Write-Output $message
         foreach ($er in $job.Errors) {
             foreach ($pe in $er.ProviderErrorDetails) {
@@ -143,10 +141,8 @@ if (-not $recFab) {
     Write-Output "Created Recovery Fabric '$($recFab.Name)'."
 }
 
-$message = 'Primary Fabric {0}' -f $priFab.Id
-Write-Output $message
-$message = 'Recovery Fabric {0}' -f $recFab.Id
-Write-Output $message
+Write-Output "Primary Fabric '$($priFab.Id)"
+Write-Output "Recovery Fabric '$($recFab.Id)'"
 Write-Output ''
 
 $DeploymentScriptOutputs['PrimaryFabric'] = $priFab.Name
@@ -163,7 +159,7 @@ if (-not $priContainer) {
     } while ($job.State -ne 'Succeeded' -and $job.State -ne 'Failed' -and $job.State -ne 'CompletedWithInformation')
 
     if ($job.State -eq 'Failed') {
-        $message = 'Job {0} failed for {1}' -f $job.DisplayName, $job.TargetObjectName
+        $message = "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
         Write-Output $message
         foreach ($er in $job.Errors) {
             foreach ($pe in $er.ProviderErrorDetails) {
@@ -191,7 +187,7 @@ if (-not $recContainer) {
     } while ($job.State -ne 'Succeeded' -and $job.State -ne 'Failed' -and $job.State -ne 'CompletedWithInformation')
 
     if ($job.State -eq 'Failed') {
-        $message = 'Job {0} failed for {1}' -f $job.DisplayName, $job.TargetObjectName
+        $message = "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
         Write-Output $message
         foreach ($er in $job.Errors) {
             foreach ($pe in $er.ProviderErrorDetails) {
@@ -209,10 +205,8 @@ if (-not $recContainer) {
     Write-Output "Created Recovery Protection Container '$($recContainer.Name)' on primary fabric '$($recFab.Name)'."
 }
 
-$message = 'Primary Protection Container {0}' -f $priContainer.Id
-Write-Output $message
-$message = 'Recovery Protection Container {0}' -f $recContainer.Id
-Write-Output $message
+Write-Output "Primary Protection Container '$($priContainer.Id)'"
+Write-Output "Recovery Protection Container '$($recContainer.Id)'"
 Write-Output ''
 
 $DeploymentScriptOutputs['PrimaryProtectionContainer'] = $priContainer.Name
@@ -232,7 +226,7 @@ if (-not $primaryProtectionContainerMapping) {
         } while ($job.State -ne 'Succeeded' -and $job.State -ne 'Failed' -and $job.State -ne 'CompletedWithInformation')
 
         if ($job.State -eq 'Failed') {
-            $message = 'Job {0} failed for {1}' -f $job.DisplayName, $job.TargetObjectName
+            $message = "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
             Write-Output $message
             foreach ($er in $job.Errors) {
                 foreach ($pe in $er.ProviderErrorDetails) {
@@ -258,15 +252,15 @@ if (-not $primaryProtectionContainerMapping) {
     } while ($job.State -ne 'Succeeded' -and $job.State -ne 'Failed' -and $job.State -ne 'CompletedWithInformation')
 
     if ($job.State -eq 'Failed') {
-        $message = 'Job {0} failed for {1}' -f $job.DisplayName, $job.TargetObjectName
+        $message = "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
         Write-Output $message
         foreach ($er in $job.Errors) {
             foreach ($pe in $er.ProviderErrorDetails) {
-                $pe
+                $pe | Out-String | Write-Host
             }
 
             foreach ($se in $er.ServiceErrorDetails) {
-                $se
+                $se | Out-String | Write-Host
             }
         }
 
@@ -288,8 +282,7 @@ if (-not $reverseContainerMapping) {
         } while ($job.State -ne 'Succeeded' -and $job.State -ne 'Failed' -and $job.State -ne 'CompletedWithInformation')
 
         if ($job.State -eq 'Failed') {
-            $message = 'Job {0} failed for {1}' -f $job.DisplayName, $job.TargetObjectName
-            Write-Output $message
+            Write-Output "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
             foreach ($er in $job.Errors) {
                 foreach ($pe in $er.ProviderErrorDetails) {
                     $pe
@@ -308,15 +301,14 @@ if (-not $reverseContainerMapping) {
 
     $protectionContainerMappingName = $recContainer.Name + 'To' + $priContainer.Name
     $job = New-ASRProtectionContainerMapping -Name $protectionContainerMappingName -Policy $policy -PrimaryProtectionContainer $recContainer `
-        -RecoveryProtectionContainer $priContainer
+    -RecoveryProtectionContainer $priContainer
     do {
         Start-Sleep -Seconds 5
         $job = Get-ASRJob -Job $job
     } while ($job.State -ne 'Succeeded' -and $job.State -ne 'Failed' -and $job.State -ne 'CompletedWithInformation')
 
     if ($job.State -eq 'Failed') {
-        $message = 'Job {0} failed for {1}' -f $job.DisplayName, $job.TargetObjectName
-        Write-Output $message
+        Write-Output "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
         foreach ($er in $job.Errors) {
             foreach ($pe in $er.ProviderErrorDetails) {
                 $pe
@@ -333,8 +325,7 @@ if (-not $reverseContainerMapping) {
     Write-Output "Created Recovery Protection Container mappings: '$($reverseContainerMapping.Name)', Source '$($reverseContainerMapping.SourceFabricFriendlyName)' - Target '$($reverseContainerMapping.TargetFabricFriendlyName)'."
 }
 
-$message = 'Protection Container mapping {0}' -f $primaryProtectionContainerMapping.Id
-Write-Output $message
+Write-Output "Protection Container mapping '$($primaryProtectionContainerMapping.Id)'"
 Write-Output ''
 
 $DeploymentScriptOutputs['PrimaryProtectionContainerMapping'] = $primaryProtectionContainerMapping.Name
@@ -342,51 +333,51 @@ $DeploymentScriptOutputs['RecoveryProtectionContainerMapping'] = $reverseContain
 
 # Start enabling replication for all the VMs.
 $enableReplicationJobs = New-Object System.Collections.ArrayList
+
 foreach ($sourceVmArmId in $sourceVmARMIds) {
     # Trigger Enable protection
     $vmIdTokens = $sourceVmArmId.Split('/');
     $vmName = $vmIdTokens[8]
     $vmResourceGroupName = $vmIdTokens[4]
-    $message = 'Enable protection to be triggered for {0} using VM name {1} as protected item ARM name.' -f $sourceVmArmId, $vmName
     $vm = Get-AzVM -ResourceGroupName $vmResourceGroupName -Name $vmName
-    Write-Output $message
+    Write-Output "Enable protection to be triggered for '$sourceVmArmId' using VM name '$vmName' as protected item ARM name."
     $diskList = New-Object System.Collections.ArrayList
 
     $osDisk = New-AzRecoveryServicesAsrAzureToAzureDiskReplicationConfig -DiskId $Vm.StorageProfile.OsDisk.ManagedDisk.Id `
-        -LogStorageAccountId $PrimaryStagingStorageAccount -ManagedDisk -RecoveryReplicaDiskAccountType $RecoveryReplicaDiskAccountType `
-        -RecoveryResourceGroupId $TargetResourceGroupId -RecoveryTargetDiskAccountType $RecoveryTargetDiskAccountType          
+    -LogStorageAccountId $PrimaryStagingStorageAccount -ManagedDisk -RecoveryReplicaDiskAccountType $RecoveryReplicaDiskAccountType `
+    -RecoveryResourceGroupId $TargetResourceGroupId -RecoveryTargetDiskAccountType $RecoveryTargetDiskAccountType          
     [void]$diskList.Add($osDisk)
 	
     foreach ($dataDisk in $script:AzureArtifactsInfo.Vm.StorageProfile.DataDisks) {
         $disk = New-AzRecoveryServicesAsrAzureToAzureDiskReplicationConfig -DiskId $dataDisk.ManagedDisk.Id `
-            -LogStorageAccountId $PrimaryStagingStorageAccount -ManagedDisk -RecoveryReplicaDiskAccountType $RecoveryReplicaDiskAccountType `
-            -RecoveryResourceGroupId $TargetResourceGroupId -RecoveryTargetDiskAccountType $RecoveryTargetDiskAccountType
+        -LogStorageAccountId $PrimaryStagingStorageAccount -ManagedDisk -RecoveryReplicaDiskAccountType $RecoveryReplicaDiskAccountType `
+        -RecoveryResourceGroupId $TargetResourceGroupId -RecoveryTargetDiskAccountType $RecoveryTargetDiskAccountType
         [void]$diskList.Add($disk)
     }
 	
-    $message = 'Enable protection being triggered.'
-    Write-Output $message
+    Write-Output 'Enable protection being triggered.'
 	
     $job = New-ASRReplicationProtectedItem -Name $vmName -ProtectionContainerMapping $primaryProtectionContainerMapping `
-        -AzureVmId $vm.ID -AzureToAzureDiskReplicationConfiguration $diskList -RecoveryResourceGroupId $TargetResourceGroupId `
-        -RecoveryAzureNetworkId $TargetVirtualNetworkId -RecoveryAvailabilityZone $RecoveryAvailabilityZone
+    -AzureVmId $vm.ID -AzureToAzureDiskReplicationConfiguration $diskList -RecoveryResourceGroupId $TargetResourceGroupId `
+    -RecoveryAzureNetworkId $TargetVirtualNetworkId -RecoveryAvailabilityZone $RecoveryAvailabilityZone
     [void]$enableReplicationJobs.Add($job)
 }
 
 Write-Output ''
+$replicationAlreadyEnabled = $false
 
 # Monitor each enable replication job.
 $protectedItemArmIds = New-Object System.Collections.ArrayList
 foreach ($job in $enableReplicationJobs) {
     do {
-        Start-Sleep -Seconds 5
+        Start-Sleep -Seconds 10
         $job = Get-ASRJob -Job $job
         Write-Output $job.State
-    } while ($job.State -ne 'Succeeded' -and $job.State -ne 'Failed' -and $job.State -ne 'CompletedWithInformation')
+    } while ($job.State -notin 'Succeeded', 'Failed', 'CompletedWithInformation')
 
     if ($job.State -eq 'Failed') {
-        $message = 'Job {0} failed for {1}' -f $job.DisplayName, $job.TargetObjectName
-        Write-Output $message
+        
+        Write-Output "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
         foreach ($er in $job.Errors) {
             foreach ($pe in $er.ProviderErrorDetails) {
                 $pe
@@ -399,40 +390,51 @@ foreach ($job in $enableReplicationJobs) {
 
         throw $message
     }
+    elseif ($job.State -eq 'CompletedWithInformation') {
+        if ($job.Errors.Count -gt 0) { 
+            if ($job.Errors[0].ServiceErrorDetails.Code -eq 45031)
+            {
+                Write-Output "$($job.Errors[0].ServiceErrorDetails.Message) ($($job.TargetObjectName))"
+                $replicationAlreadyEnabled = $true
+            }
+        }
+    }
     $targetObjectName = $job.TargetObjectName
     Write-Output "Enable protection completed for '$($targetObjectName). Waiting for IR."
 	
-    $startTime = $job.StartTime
-    $irFinished = $false
-    do {
-        $irJobs = Get-ASRJob | 
-            Where-Object { $_.JobType -like '*IrCompletion' -and
+    if (-not $replicationAlreadyEnabled) {
+        $startTime = $job.StartTime
+        $irFinished = $false
+        do 
+        {
+            $irJobs = Get-ASRJob | Where-Object { $_.JobType -like '*IrCompletion' -and
                 $_.TargetObjectName -eq $targetObjectName -and
-                $_.StartTime -gt $startTime } | Sort-Object StartTime -Descending | Select-Object -First 2
-
-        if (-not $irJobs -and $irJobs.Length -ne 0) {
-            $secondaryIrJob = $irJobs | Where-Object { $_.JobType -like 'SecondaryIrCompletion' }
-            if (-not $secondaryIrJob -and $secondaryIrJob.Length -ge 1) {
-                $irFinished = $secondaryIrJob.State -eq 'Succeeded' -or $secondaryIrJob.State -eq 'Failed'
+            $_.StartTime -gt $startTime} |
+            Sort-Object StartTime -Descending | Select-Object -First 2  
+            if ($irJobs) {
+                $secondaryIrJob = $irJobs | Where-Object { $_.JobType -eq 'SecondaryIrCompletion' }
+                
+                if (-not $secondaryIrJob -and $secondaryIrJob.Length -ge 1) {
+                    $irFinished = $secondaryIrJob.State -eq 'Succeeded' -or $secondaryIrJob.State -eq 'Failed'
+                }
+                else {
+                    $irFinished = $irJobs.State -eq 'Failed'
+                }
             }
-            else {
-                $irFinished = $irJobs.State -eq 'Failed'
+	
+            if (-not $irFinished) {
+                Start-Sleep -Seconds 5
             }
-        }
+        } while (-not $irFinished)
 	
-        if (-not $irFinished) {
-            Start-Sleep -Seconds 5
-        }
-    } while (-not $irFinished)
-	
-    $message = 'IR completed for {0}.' -f $targetObjectName
-    Write-Output $message
+        $message = 'IR completed for {0}.' -f $targetObjectName
+        Write-Output $message
+    }
 	
     $rpi = Get-ASRReplicationProtectedItem -Name $targetObjectName -ProtectionContainer $priContainer
 	
-    $message = 'Enable replciation completed for {0}.' -f $rpi.ID
-    Write-Output $message
-    [void]$protectedItemArmIds.Add($rpi.Id)
+    Write-Output "Enable replciation completed for '$($rpi.ID)'."
+    $protectedItemArmIds.Add($rpi.Id)
 }
 
 $DeploymentScriptOutputs['ProtectedItemArmIds'] = $protectedItemArmIds -join ','	
