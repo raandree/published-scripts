@@ -3,6 +3,10 @@ param(
     [string]
     $VaultSubscriptionId,
 
+    [Parameter()]
+    [string]
+    $VaultTenantId,
+
     [Parameter(Mandatory = $true)]
     [string]
     $VaultResourceGroupName,
