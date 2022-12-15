@@ -52,6 +52,9 @@ param(
     $RecoveryTargetDiskAccountType = 'Standard_LRS'
 )
 
+Write-Host 'Parameters:'
+$PSBoundParameters | Out-String | Write-Host
+
 # Initialize the designated output of deployment script that can be accessed by various scripts in the template.
 $DeploymentScriptOutputs = @{}
 $sourceVmARMIds = New-Object System.Collections.ArrayList
