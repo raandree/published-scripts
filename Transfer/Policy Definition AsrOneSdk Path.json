@@ -518,15 +518,4 @@
       "effect": "[parameters('effect')]"
     }
   }
-},
-"id": "/subscriptions/bad588ac-2cc0-4c50-990a-aa211e966542/providers/Microsoft.Authorization/policyDefinitions/9bd78f8c-2378-4143-aa03-a22c56cd46b8",
-"type": "Microsoft.Authorization/policyDefinitions",
-"name": "9bd78f8c-2378-4143-aa03-a22c56cd46b8",
-"systemData": {
-  "createdBy": "raandree@microsoft.com",
-  "createdByType": "User",
-  "createdAt": "2022-12-07T15:17:02.9735745Z",
-  "lastModifiedBy": "raandree@microsoft.com",
-  "lastModifiedByType": "User",
-  "lastModifiedAt": "2022-12-08T08:12:46.9145831Z"
 }
