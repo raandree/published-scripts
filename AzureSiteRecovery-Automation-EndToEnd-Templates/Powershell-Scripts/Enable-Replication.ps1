@@ -428,6 +428,9 @@ foreach ($job in $enableReplicationJobs) {
                     $irFinished = $irJobs.State -eq 'Failed' -or $irJobs.State -eq 'Succeeded'
                 }
             }
+            else {
+                $irFinished = $true
+            }
 	
             if (-not $irFinished) {
                 Start-Sleep -Seconds 5
@@ -440,7 +443,7 @@ foreach ($job in $enableReplicationJobs) {
     $rpi = Get-ASRReplicationProtectedItem -Name $targetObjectName -ProtectionContainer $priContainer
 	
     Write-Output "Enable replciation completed for '$($rpi.ID)'."
-    $protectedItemArmIds.Add($rpi.Id)
+    [void]$protectedItemArmIds.Add($rpi.Id)
 }
 
 $DeploymentScriptOutputs['ProtectedItemArmIds'] = $protectedItemArmIds -join ','	
