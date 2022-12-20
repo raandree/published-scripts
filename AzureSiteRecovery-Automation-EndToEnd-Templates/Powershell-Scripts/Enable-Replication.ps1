@@ -412,10 +412,10 @@ foreach ($job in $enableReplicationJobs) {
         $startTime = $job.StartTime
         $irFinished = $false
         do {
-            $irJobs = Get-ASRJob | Where-Object { $_.JobType -eq 'PrimaryIrCompletion' -and
+            $irJobs = Get-ASRJob | Where-Object { $_.JobType -like '*IrCompletion' -and
                 $_.TargetObjectName -eq $targetObjectName -and
                 $_.StartTime -gt $startTime } |
-                Sort-Object StartTime -Descending | Select-Object -First 1  
+                Sort-Object StartTime -Descending | Select-Object -First 2
             if ($irJobs) {
                 $secondaryIrJob = $irJobs | Where-Object { $_.JobType -eq 'SecondaryIrCompletion' }
                 
