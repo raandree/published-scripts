@@ -436,7 +436,7 @@
                     "forceUpdateTag": "parameters('forceTag')",
                     "azPowerShellVersion": "3.0",
                     "timeout": "PT4H",
-                    "arguments": "[concat('-VaultSubscriptionId', ' ', parameters('vaultSubscriptionId'), ' ', '-vaultResourceGroupName', ' ', parameters('vaultResourceGroupName'), ' ', '-vaultName', ' ', parameters('vaultName'), ' ', '-primaryRegion', ' ', replace(string(parameters('sourceRegion')), ' ', ''), ' ', '-recoveryRegion', ' ', replace(string(parameters('targetRegion')), ' ', ''), ' ', '-policyName', ' ', parameters('policyName'), ' ', '-sourceVmARMIdsCSV', ' \\\"', parameters('VmId'), '\\\" ','-TargetResourceGroupId', ' ', variables('targetResourceGroupId'), ' ', '-TargetVirtualNetworkId', ' ', parameters('recoveryNetworkId'),' ', '-PrimaryStagingStorageAccount', ' ', parameters('cacheStorageAccountId'), ' ', '-RecoveryReplicaDiskAccountType', ' ', variables('storageAccountSKUName'), ' ', '-RecoveryTargetDiskAccountType', ' ', variables('storageAccountSKUName'), ' ', '-RecoveryAvailabilityZone', ' ', variables('recoveryAvZone'))]",
+                    "arguments": "[concat('-VaultSubscriptionId', ' ', parameters('vaultSubscriptionId'), ' ', '-vaultResourceGroupName', ' ', parameters('vaultResourceGroupName'), ' ', '-vaultName', ' ', parameters('vaultName'), ' ', '-primaryRegion', ' ', replace(string(parameters('sourceRegion')), ' ', ''), ' ', '-recoveryRegion', ' ', replace(string(parameters('targetRegion')), ' ', ''), ' ', '-policyName', ' ', parameters('policyName'), ' ', '-sourceVmARMIdsCSV', ' \\\"', parameters('VmId'), '\\\" ','-TargetResourceGroupId', ' ', variables('targetResourceGroupId'), ' ', '-TargetVirtualNetworkId', ' ', parameters('recoveryNetworkId'),' ', '-PrimaryStagingStorageAccount', ' ', variables('cacheStorageAccountId'), ' ', '-RecoveryReplicaDiskAccountType', ' ', variables('storageAccountSKUName'), ' ', '-RecoveryTargetDiskAccountType', ' ', variables('storageAccountSKUName'), ' ', '-RecoveryAvailabilityZone', ' ', variables('recoveryAvZone'))]",
                     "primaryScriptURI": "https://raw.githubusercontent.com/raandree/published-scripts/master/AzureSiteRecovery-Automation-EndToEnd-Templates/Powershell-Scripts/Enable-Replication.ps1",
                     "cleanupPreference": "Always",
                     "retentionInterval": "P1D"
@@ -485,6 +485,7 @@
                 "storagePrefix": "Storage-",
                 "storageType": "Microsoft.Storage/storageAccounts",
                 "targetResourceGroupId": "[concat('/subscriptions/', parameters('recoverySubscriptionId'), '/resourceGroups/', parameters('targetResourceGroupName'))]",
+                "cacheStorageAccountId": "[concat('/subscriptions/', parameters('recoverySubscriptionId'), '/resourceGroups/', parameters('vaultResourceGroupName'), '/providers/Microsoft.Storage/storageAccounts/', parameters('cacheStorageAccountId'))]",
                 "vaultId": "[resourceId(parameters('vaultResourceGroupName'), variables('vaultType'), parameters('vaultName'))]",
                 "vaultType": "Microsoft.RecoveryServices/vaults",
                 "vmApiVersion": "2019-07-01",
