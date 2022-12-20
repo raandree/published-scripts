@@ -76,9 +76,7 @@ Write-Output ''
 
 # Setup the vault context.
 Write-Output "Setting Vault context using vault '$VaultName' under resource group '$VaultResourceGroupName' in subscription '$VaultSubscriptionId'."
-$DebugPreference = 'Continue'
-$subscription = Select-AzSubscription -SubscriptionId $VaultSubscriptionId -Verbose
-$DebugPreference = 'SilentlyContinue'
+$subscription = Select-AzSubscription -SubscriptionId $VaultSubscriptionId
 $vault = Get-AzRecoveryServicesVault -ResourceGroupName $VaultResourceGroupName -Name $VaultName
 $vaultContext = Set-AzRecoveryServicesAsrVaultContext -Vault $vault
 
