@@ -384,14 +384,14 @@ foreach ($job in $enableReplicationJobs) {
 
     if ($job.State -eq 'Failed') {
         
-        Write-Output "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
+        $message = "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
         foreach ($er in $job.Errors) {
             foreach ($pe in $er.ProviderErrorDetails) {
-                $pe
+                $pe | Out-String | Write-Host
             }
 
             foreach ($se in $er.ServiceErrorDetails) {
-                $se
+                $se | Out-String | Write-Host
             }
         }
 
