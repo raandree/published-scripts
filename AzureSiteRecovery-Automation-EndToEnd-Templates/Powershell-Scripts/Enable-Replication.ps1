@@ -105,13 +105,8 @@ if (-not $priFab) {
         $message = "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
         Write-Output $message
         foreach ($er in $job.Errors) {
-            foreach ($pe in $er.ProviderErrorDetails) {
-                $pe
-            }
-
-            foreach ($se in $er.ServiceErrorDetails) {
-                $se
-            }
+            $er.ProviderErrorDetails | Out-String | Write-Host
+            $er.ServiceErrorDetails | Out-String | Write-Host
         }
 
         throw $message
@@ -133,13 +128,8 @@ if (-not $recFab) {
         $message = "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
         Write-Output $message
         foreach ($er in $job.Errors) {
-            foreach ($pe in $er.ProviderErrorDetails) {
-                $pe
-            }
-
-            foreach ($se in $er.ServiceErrorDetails) {
-                $se
-            }
+            $er.ProviderErrorDetails | Out-String | Write-Host
+            $er.ServiceErrorDetails | Out-String | Write-Host
         }
 
         throw $message
@@ -169,17 +159,13 @@ if (-not $priContainer) {
         $message = "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
         Write-Output $message
         foreach ($er in $job.Errors) {
-            foreach ($pe in $er.ProviderErrorDetails) {
-                $pe
-            }
-
-            foreach ($se in $er.ServiceErrorDetails) {
-                $se
-            }
+            $er.ProviderErrorDetails | Out-String | Write-Host
+            $er.ServiceErrorDetails | Out-String | Write-Host
         }
 
         throw $message
     }
+    
     $priContainer = Get-ASRProtectionContainer -Name $priFab.Name -Fabric $priFab
     Write-Output "Created Primary Protection Container '$($priContainer.Name)' on primary fabric '$($priFab.Name)'."
 }
@@ -197,17 +183,13 @@ if (-not $recContainer) {
         $message = "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
         Write-Output $message
         foreach ($er in $job.Errors) {
-            foreach ($pe in $er.ProviderErrorDetails) {
-                $pe
-            }
-
-            foreach ($se in $er.ServiceErrorDetails) {
-                $se
-            }
+            $er.ProviderErrorDetails | Out-String | Write-Host
+            $er.ServiceErrorDetails | Out-String | Write-Host
         }
 
         throw $message
     }
+    
     $recContainer = Get-ASRProtectionContainer -Name "$($recFab.Name.Replace(' ', ''))-R" -Fabric $recFab
     Write-Output "Created Recovery Protection Container '$($recContainer.Name)' on primary fabric '$($recFab.Name)'."
 }
@@ -236,13 +218,8 @@ if (-not $primaryProtectionContainerMapping) {
             $message = "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
             Write-Output $message
             foreach ($er in $job.Errors) {
-                foreach ($pe in $er.ProviderErrorDetails) {
-                    $pe
-                }
-
-                foreach ($se in $er.ServiceErrorDetails) {
-                    $se
-                }
+                $er.ProviderErrorDetails | Out-String | Write-Host
+                $er.ServiceErrorDetails | Out-String | Write-Host
             }
 
             throw $message
@@ -262,13 +239,8 @@ if (-not $primaryProtectionContainerMapping) {
         $message = "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
         Write-Output $message
         foreach ($er in $job.Errors) {
-            foreach ($pe in $er.ProviderErrorDetails) {
-                $pe | Out-String | Write-Host
-            }
-
-            foreach ($se in $er.ServiceErrorDetails) {
-                $se | Out-String | Write-Host
-            }
+            $er.ProviderErrorDetails | Out-String | Write-Host
+            $er.ServiceErrorDetails | Out-String | Write-Host
         }
 
         throw $message
@@ -291,13 +263,8 @@ if (-not $reverseContainerMapping) {
         if ($job.State -eq 'Failed') {
             Write-Output "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
             foreach ($er in $job.Errors) {
-                foreach ($pe in $er.ProviderErrorDetails) {
-                    $pe
-                }
-
-                foreach ($se in $er.ServiceErrorDetails) {
-                    $se
-                }
+                $er.ProviderErrorDetails | Out-String | Write-Host
+                $er.ServiceErrorDetails | Out-String | Write-Host
             }
 
             throw $message
@@ -317,13 +284,8 @@ if (-not $reverseContainerMapping) {
     if ($job.State -eq 'Failed') {
         Write-Output "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
         foreach ($er in $job.Errors) {
-            foreach ($pe in $er.ProviderErrorDetails) {
-                $pe
-            }
-
-            foreach ($se in $er.ServiceErrorDetails) {
-                $se
-            }
+            $er.ProviderErrorDetails | Out-String | Write-Host
+            $er.ServiceErrorDetails | Out-String | Write-Host
         }
 
         throw $message
@@ -386,13 +348,8 @@ foreach ($job in $enableReplicationJobs) {
         
         $message = "Job '$($job.DisplayName)' failed for '$($job.TargetObjectName)'"
         foreach ($er in $job.Errors) {
-            foreach ($pe in $er.ProviderErrorDetails) {
-                $pe | Out-String | Write-Host
-            }
-
-            foreach ($se in $er.ServiceErrorDetails) {
-                $se | Out-String | Write-Host
-            }
+            $er.ProviderErrorDetails | Out-String | Write-Host
+            $er.ServiceErrorDetails | Out-String | Write-Host
         }
 
         throw $message
