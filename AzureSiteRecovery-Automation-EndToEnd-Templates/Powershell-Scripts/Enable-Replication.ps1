@@ -85,14 +85,9 @@ Write-Output ''
 
 # Setup the vault context.
 Write-Output "Setting Vault context using vault '$VaultName' under resource group '$VaultResourceGroupName' in subscription '$VaultSubscriptionId'."
-$subscription = Select-AzSubscription -SubscriptionId $VaultSubscriptionId
+$subscription = Set-AzContext -SubscriptionId $VaultSubscriptionId
 $vault = Get-AzRecoveryServicesVault -ResourceGroupName $VaultResourceGroupName -Name $VaultName
 $vaultContext = Set-AzRecoveryServicesAsrVaultContext -Vault $vault
-
-if ($RecoverySubscriptionId -ne $VaultSubscriptionId) {
-    Write-Output "Setting Recovery Subscription context using subscription '$RecoverySubscriptionId'."
-    $subscription = Select-AzSubscription -SubscriptionId $RecoverySubscriptionId
-}
 
 Write-Output "Vault context set to '$($vaultContext.ResourceGroupName) - $($vaultContext.ResourceName)'"
 Write-Output ''
@@ -318,6 +313,11 @@ $DeploymentScriptOutputs['RecoveryProtectionContainerMapping'] = $reverseContain
 $enableReplicationJobs = New-Object System.Collections.ArrayList
 
 foreach ($sourceVmArmId in $sourceVmARMIds) {
+    if ($RecoverySubscriptionId -ne $VaultSubscriptionId) {
+        Write-Output "Setting Recovery Subscription context using subscription '$RecoverySubscriptionId'."
+        $subscription = Set-AzContext -SubscriptionId $RecoverySubscriptionId
+    }
+    
     # Trigger Enable protection
     $vmIdTokens = $sourceVmArmId.Split('/');
     $vmName = $vmIdTokens[8]
@@ -340,6 +340,11 @@ foreach ($sourceVmArmId in $sourceVmARMIds) {
 	
     Write-Output 'Enable protection being triggered.'
 	
+    if ($RecoverySubscriptionId -ne $VaultSubscriptionId) {
+        Write-Output "Setting Vault Subscription context using subscription '$VaultSubscriptionId'."
+        $subscription = Set-AzContext -SubscriptionId $VaultSubscriptionId
+    }
+    
     $job = New-ASRReplicationProtectedItem -Name $vmName -ProtectionContainerMapping $primaryProtectionContainerMapping `
         -AzureVmId $vm.ID -AzureToAzureDiskReplicationConfiguration $diskList -RecoveryResourceGroupId $TargetResourceGroupId `
         -RecoveryAzureNetworkId $TargetVirtualNetworkId -RecoveryAvailabilityZone $RecoveryAvailabilityZone
@@ -355,7 +360,7 @@ foreach ($job in $enableReplicationJobs) {
     do {
         Start-Sleep -Seconds 10
         $job = Get-ASRJob -Job $job
-        Write-Output $job.State
+        Write-Output "$($job.State) - $((Get-Date).ToLongTimeString())"
     } while ($job.State -notin 'Succeeded', 'Failed', 'CompletedWithInformation')
 
     if ($job.State -eq 'Failed') {
