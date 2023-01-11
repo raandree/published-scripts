@@ -5,7 +5,6 @@
             "metadata": {
                 "displayName": "Cache storage account",
                 "description": "Existing cache storage account ID or prefix for the cache storage account name to be created in source region.",
-                "strongType": "Microsoft.Storage/storageAccounts",
                 "serviceName": "ASR"
             },
             "defaultValue": ""
@@ -104,7 +103,6 @@
             "metadata": {
                 "displayName": "Recovery Services Vault",
                 "description": "Recovery services vault to be used for disaster recovery configurations",
-                "strongType": "Microsoft.RecoveryServices/vaults",
                 "serviceName": "ASR"
             }
         },
@@ -113,7 +111,6 @@
             "metadata": {
                 "displayName": "Vault Resource Group",
                 "description": "The resource group containing the recovery services vault used for disaster recovery configurations",
-                "strongType": "Microsoft.Resources/resourceGroups",
                 "assignPermissions": true,
                 "serviceName": "ASR"
             }
