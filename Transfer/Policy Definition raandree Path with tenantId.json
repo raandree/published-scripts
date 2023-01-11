@@ -10,6 +10,14 @@
             },
             "defaultValue": ""
         },
+        "vaultSubscriptionId": {
+            "type": "String",
+            "metadata": {
+                "displayName": "Vault Subscription ID",
+                "description": null
+            },
+            "defaultValue": ""
+        },
         "effect": {
             "type": "String",
             "metadata": {
@@ -232,7 +240,7 @@
                                 "value": "[last(split(parameters('vaultResourceGroupId'), '/'))]"
                             },
                             "vaultSubscriptionId": {
-                                "value": "[subscription().subscriptionId]"
+                                "value": "[parameters('vaultSubscriptionId')]"
                             },
                             "vaultTenantId": {
                                 "value": "[subscription().tenantId]"
