@@ -208,7 +208,7 @@ if (-not $recContainer) {
 
         throw $message
     }
-    $recContainer = Get-ASRProtectionContainer -Name $recFab.Name -Fabric $recFab
+    $recContainer = Get-ASRProtectionContainer -Name "$($recFab.Name.Replace(' ', ''))-R" -Fabric $recFab
     Write-Output "Created Recovery Protection Container '$($recContainer.Name)' on primary fabric '$($recFab.Name)'."
 }
 
