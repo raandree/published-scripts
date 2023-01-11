@@ -5,6 +5,10 @@ param(
 
     [Parameter()]
     [string]
+    $RecoverySubscriptionId,
+    
+    [Parameter()]
+    [string]
     $VaultTenantId,
 
     [Parameter(Mandatory = $true)]
@@ -59,6 +63,11 @@ param(
 Write-Host 'Parameters:'
 $PSBoundParameters | Out-String | Write-Host
 
+if (-not $RecoverySubscriptionId) {
+    Write-Host "RecoverySubscriptionId is not provided. Using VaultSubscriptionId '$VaultSubscriptionId' as RecoverySubscriptionId."
+    $RecoverySubscriptionId = $VaultSubscriptionId
+}
+
 # Initialize the designated output of deployment script that can be accessed by various scripts in the template.
 $DeploymentScriptOutputs = @{}
 $sourceVmARMIds = New-Object System.Collections.ArrayList
@@ -79,6 +88,11 @@ Write-Output "Setting Vault context using vault '$VaultName' under resource grou
 $subscription = Select-AzSubscription -SubscriptionId $VaultSubscriptionId
 $vault = Get-AzRecoveryServicesVault -ResourceGroupName $VaultResourceGroupName -Name $VaultName
 $vaultContext = Set-AzRecoveryServicesAsrVaultContext -Vault $vault
+
+if ($RecoverySubscriptionId -ne $VaultSubscriptionId) {
+    Write-Output "Setting Recovery Subscription context using subscription '$RecoverySubscriptionId'."
+    $subscription = Select-AzSubscription -SubscriptionId $RecoverySubscriptionId
+}
 
 Write-Output "Vault context set to '$($vaultContext.ResourceGroupName) - $($vaultContext.ResourceName)'"
 Write-Output ''
