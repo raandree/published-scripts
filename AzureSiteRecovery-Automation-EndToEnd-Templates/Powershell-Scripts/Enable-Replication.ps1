@@ -100,6 +100,14 @@ Write-Host '-------------------------- Loaded 2 --------------------------------
 Get-Module -Name Az* | Format-Table -Property Name, Version | Out-String | Write-Host
 Write-Host '----------------------------------------------------------'
 
+Remove-Module -Name Az* -Force
+Import-Module -Name Az.RecoveryServices -RequiredVersion 6.1.2
+
+Write-Host '-------------------------- Loaded 3 -------------------------------------'
+Get-Module -Name Az* | Format-Table -Property Name, Version | Out-String | Write-Host
+Write-Host '----------------------------------------------------------'
+
+
 if (-not $RecoverySubscriptionId) {
     Write-Host "RecoverySubscriptionId is not provided. Using VaultSubscriptionId '$VaultSubscriptionId' as RecoverySubscriptionId."
     $RecoverySubscriptionId = $VaultSubscriptionId
