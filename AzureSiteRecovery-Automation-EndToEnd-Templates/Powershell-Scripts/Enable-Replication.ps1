@@ -65,7 +65,11 @@ Write-Host 'Parameters:'
 $PSBoundParameters | Out-String | Write-Host
 Write-Host '----------------------------------------------------------'
 
+Write-Host '------------------------ ListAvailable ----------------------------------'
+Get-Module -Name Az* -ListAvailable | Format-Table -Property Name, Version | Out-String | Write-Host
 Write-Host '----------------------------------------------------------'
+
+Write-Host '--------------------------- Loaded --------------------------------------'
 Get-Module -Name Az* -ListAvailable | Format-Table -Property Name, Version | Out-String | Write-Host
 Write-Host '----------------------------------------------------------'
 
@@ -73,8 +77,15 @@ Write-Host '----------------------------------------------------------'
 Install-Module -Name Az.Accounts, Az.Compute, Az.RecoveryServices -Scope AllUsers -Force
 Write-Host '----------------------------------------------------------'
 
-Write-Host '----------------------------------------------------------'
+Write-Host '------------------------ ListAvailable ----------------------------------'
 Get-Module -Name Az* -ListAvailable | Format-Table -Property Name, Version | Out-String | Write-Host
+Write-Host '----------------------------------------------------------'
+
+Write-Host '--------------------------- Loaded --------------------------------------'
+Get-Module -Name Az* -ListAvailable | Format-Table -Property Name, Version | Out-String | Write-Host
+Write-Host '----------------------------------------------------------'
+
+Write-Host '----------------------------------------------------------'
 Get-Module -Name Az* -ListAvailable | Out-String | Write-Host
 Write-Host '----------------------------------------------------------'
 
