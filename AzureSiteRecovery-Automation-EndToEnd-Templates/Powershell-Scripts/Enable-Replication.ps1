@@ -66,7 +66,7 @@ $PSBoundParameters | Out-String | Write-Host
 Write-Host '----------------------------------------------------------'
 
 Write-Host '----------------------------------------------------------'
-Get-Module -Name Az.RecoveryServices -ListAvailable | Out-String | Write-Host
+Get-Module -Name Az* -ListAvailable | Format-Table -Property Name, Version | Out-String | Write-Host
 Write-Host '----------------------------------------------------------'
 
 if (-not $RecoverySubscriptionId) {
