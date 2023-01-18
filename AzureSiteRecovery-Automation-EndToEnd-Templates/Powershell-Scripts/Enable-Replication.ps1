@@ -60,8 +60,14 @@ param(
     $RecoveryTargetDiskAccountType = 'Standard_LRS'
 )
 
+Write-Host '----------------------------------------------------------'
 Write-Host 'Parameters:'
 $PSBoundParameters | Out-String | Write-Host
+Write-Host '----------------------------------------------------------'
+
+Write-Host '----------------------------------------------------------'
+Get-Module -Name Az.RecoveryServices -ListAvailable | Out-String | Write-Host
+Write-Host '----------------------------------------------------------'
 
 if (-not $RecoverySubscriptionId) {
     Write-Host "RecoverySubscriptionId is not provided. Using VaultSubscriptionId '$VaultSubscriptionId' as RecoverySubscriptionId."
