@@ -75,6 +75,7 @@ Write-Host '----------------------------------------------------------'
 
 Write-Host '----------------------------------------------------------'
 Get-Module -Name Az* -ListAvailable | Format-Table -Property Name, Version | Out-String | Write-Host
+Get-Module -Name Az* -ListAvailable | Out-String | Write-Host
 Write-Host '----------------------------------------------------------'
 
 if (-not $RecoverySubscriptionId) {
