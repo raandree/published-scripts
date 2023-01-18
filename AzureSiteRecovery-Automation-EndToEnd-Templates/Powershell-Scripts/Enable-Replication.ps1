@@ -347,6 +347,7 @@ foreach ($sourceVmArmId in $sourceVmARMIds) {
     }
     if ($vm.StorageProfile.OsDisk.ManagedDisk.DiskEncryptionSet)
     {
+        Write-Host "OS Disk is encrypted. Adding 'RecoveryDiskEncryptionSetId' to the parameters."
         $param.Add('RecoveryDiskEncryptionSetId', $vm.StorageProfile.OsDisk.ManagedDisk.DiskEncryptionSet.Id)
     }
     $osDisk = New-AzRecoveryServicesAsrAzureToAzureDiskReplicationConfig @param
@@ -360,6 +361,11 @@ foreach ($sourceVmArmId in $sourceVmARMIds) {
             RecoveryReplicaDiskAccountType = $RecoveryReplicaDiskAccountType
             RecoveryResourceGroupId        = $TargetResourceGroupId
             RecoveryTargetDiskAccountType  = $RecoveryTargetDiskAccountType
+        }
+        if ($dataDisk.ManagedDisk.DiskEncryptionSet)
+        {
+            Write-Host "Data Disk '$($dataDisk.ManagedDisk.Id)' is encrypted. Adding 'RecoveryDiskEncryptionSetId' to the parameters."
+            $param.Add('RecoveryDiskEncryptionSetId', $dataDisk.ManagedDisk.DiskEncryptionSet.Id)
         }
         $disk = New-AzRecoveryServicesAsrAzureToAzureDiskReplicationConfig @param
         [void]$diskList.Add($disk)
