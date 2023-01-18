@@ -69,6 +69,14 @@ Write-Host '----------------------------------------------------------'
 Get-Module -Name Az* -ListAvailable | Format-Table -Property Name, Version | Out-String | Write-Host
 Write-Host '----------------------------------------------------------'
 
+Write-Host '----------------------------------------------------------'
+Install-Module -Name Az.Accounts, Az.Compute, Az.RecoveryServices -Scope AllUsers -Force
+Write-Host '----------------------------------------------------------'
+
+Write-Host '----------------------------------------------------------'
+Get-Module -Name Az* -ListAvailable | Format-Table -Property Name, Version | Out-String | Write-Host
+Write-Host '----------------------------------------------------------'
+
 if (-not $RecoverySubscriptionId) {
     Write-Host "RecoverySubscriptionId is not provided. Using VaultSubscriptionId '$VaultSubscriptionId' as RecoverySubscriptionId."
     $RecoverySubscriptionId = $VaultSubscriptionId
