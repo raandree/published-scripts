@@ -445,7 +445,7 @@
                                     },
                                     "properties": {
                                         "forceUpdateTag": "parameters('forceTag')",
-                                        "azPowerShellVersion": "3.0",
+                                        "azPowerShellVersion": "9.1",
                                         "timeout": "PT4H",
                                         "arguments": "[concat('-VaultSubscriptionId', ' ', parameters('vaultSubscriptionId'), ' ', '-vaultResourceGroupName', ' ', parameters('vaultResourceGroupName'), ' ', '-vaultName', ' ', parameters('vaultName'), ' ', '-primaryRegion', ' ', replace(string(parameters('sourceRegion')), ' ', ''), ' ', '-recoveryRegion', ' ', replace(string(parameters('targetRegion')), ' ', ''), ' ', '-policyName', ' ', parameters('policyName'), ' ', '-sourceVmARMIdsCSV', ' \\\"', parameters('VmId'), '\\\" ','-TargetResourceGroupId', ' ', variables('targetResourceGroupId'), ' ', '-TargetVirtualNetworkId', ' ', parameters('recoveryNetworkId'),' ', '-PrimaryStagingStorageAccount', ' ', variables('cacheStorageAccountArmId'), ' ', '-RecoveryReplicaDiskAccountType', ' ', variables('storageAccountSKUName'), ' ', '-RecoveryTargetDiskAccountType', ' ', variables('storageAccountSKUName'), ' ', '-RecoveryAvailabilityZone', ' ', variables('recoveryAvZone'), ' ', '-VaultTenantId', ' ', parameters('vaultTenantId'), ' ', '-RecoverySubscriptionId', ' ', parameters('recoverySubscriptionId'))]",
                                         "primaryScriptURI": "https://raw.githubusercontent.com/raandree/published-scripts/master/AzureSiteRecovery-Automation-EndToEnd-Templates/Powershell-Scripts/Enable-Replication.ps1",
