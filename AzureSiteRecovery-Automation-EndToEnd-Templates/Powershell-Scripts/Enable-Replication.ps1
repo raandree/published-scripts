@@ -90,14 +90,14 @@ Get-Module -Name Az* -ListAvailable | Out-String | Write-Host
 Write-Host '----------------------------------------------------------'
 
 Write-Host '-------------------------- Loaded 1 -------------------------------------'
-Get-Module -Name Az* -ListAvailable | Format-Table -Property Name, Version | Out-String | Write-Host
+Get-Module -Name Az* | Format-Table -Property Name, Version | Out-String | Write-Host
 Write-Host '----------------------------------------------------------'
 
 Remove-Module -Name Az.Accounts, Az.Compute, Az.RecoveryServices -Force
 Import-Module -Name Az.Accounts, Az.Compute, Az.RecoveryServices
 
 Write-Host '-------------------------- Loaded 2 -------------------------------------'
-Get-Module -Name Az* -ListAvailable | Format-Table -Property Name, Version | Out-String | Write-Host
+Get-Module -Name Az* | Format-Table -Property Name, Version | Out-String | Write-Host
 Write-Host '----------------------------------------------------------'
 
 if (-not $RecoverySubscriptionId) {
