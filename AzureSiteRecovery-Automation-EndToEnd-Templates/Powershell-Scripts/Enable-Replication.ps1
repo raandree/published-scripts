@@ -300,8 +300,14 @@ if (-not $reverseContainerMapping) {
     }
 
     $protectionContainerMappingName = $recContainer.Name + 'To' + $priContainer.Name
-    $job = New-ASRProtectionContainerMapping -Name $protectionContainerMappingName -Policy $policy -PrimaryProtectionContainer $recContainer `
-        -RecoveryProtectionContainer $priContainer
+    $param = @{
+        Name                        = $protectionContainerMappingName
+        Policy                      = $policy
+        PrimaryProtectionContainer  = $recContainer
+        RecoveryProtectionContainer = $priContainer
+    }
+    $job = New-ASRProtectionContainerMapping @param
+    
     do {
         Start-Sleep -Seconds 5
         $job = Get-ASRJob -Job $job
