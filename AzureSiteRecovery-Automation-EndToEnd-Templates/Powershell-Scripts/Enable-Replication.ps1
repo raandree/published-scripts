@@ -218,7 +218,7 @@ $DeploymentScriptOutputs['RecoveryProtectionContainer'] = $recContainer.Name
 
 # Setup the protection container mapping. Create one if it does not already exist.
 $primaryProtectionContainerMapping = Get-ASRProtectionContainerMapping -ProtectionContainer $priContainer |
-Where-Object { $_.TargetProtectionContainerId -like $recContainer.Id }
+    Where-Object { $_.TargetProtectionContainerId -like $recContainer.Id }
 if (-not $primaryProtectionContainerMapping) {
     Write-Output 'Protection Container mapping does not already exist. Creating protection container.' 
     $policy = Get-ASRPolicy -Name $policyName -ErrorAction SilentlyContinue
@@ -357,8 +357,7 @@ foreach ($sourceVmArmId in $sourceVmARMIds) {
         RecoveryResourceGroupId        = $TargetResourceGroupId
         RecoveryTargetDiskAccountType  = $RecoveryTargetDiskAccountType
     }
-    if ($vm.StorageProfile.OsDisk.ManagedDisk.DiskEncryptionSet)
-    {
+    if ($vm.StorageProfile.OsDisk.ManagedDisk.DiskEncryptionSet) {
         Write-Host "OS Disk is encrypted. Adding 'RecoveryDiskEncryptionSetId' to the parameters."
         $param.Add('RecoveryDiskEncryptionSetId', $vm.StorageProfile.OsDisk.ManagedDisk.DiskEncryptionSet.Id)
     }
@@ -374,8 +373,7 @@ foreach ($sourceVmArmId in $sourceVmARMIds) {
             RecoveryResourceGroupId        = $TargetResourceGroupId
             RecoveryTargetDiskAccountType  = $RecoveryTargetDiskAccountType
         }
-        if ($dataDisk.ManagedDisk.DiskEncryptionSet)
-        {
+        if ($dataDisk.ManagedDisk.DiskEncryptionSet) {
             Write-Host "Data Disk '$($dataDisk.ManagedDisk.Id)' is encrypted. Adding 'RecoveryDiskEncryptionSetId' to the parameters."
             $param.Add('RecoveryDiskEncryptionSetId', $dataDisk.ManagedDisk.DiskEncryptionSet.Id)
         }
@@ -391,7 +389,7 @@ foreach ($sourceVmArmId in $sourceVmARMIds) {
     }
     
     $param = @{
-        Name = $vmName
+        Name                                     = $vmName
         ProtectionContainerMapping               = $primaryProtectionContainerMapping
         AzureVmId                                = $vm.ID
         AzureToAzureDiskReplicationConfiguration = $diskList
