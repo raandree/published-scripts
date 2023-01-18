@@ -211,7 +211,8 @@ $DeploymentScriptOutputs['PrimaryProtectionContainer'] = $priContainer.Name
 $DeploymentScriptOutputs['RecoveryProtectionContainer'] = $recContainer.Name
 
 # Setup the protection container mapping. Create one if it does not already exist.
-$primaryProtectionContainerMapping = Get-ASRProtectionContainerMapping -ProtectionContainer $priContainer | Where-Object { $_.TargetProtectionContainerId -like $recContainer.Id }
+$primaryProtectionContainerMapping = Get-ASRProtectionContainerMapping -ProtectionContainer $priContainer |
+Where-Object { $_.TargetProtectionContainerId -like $recContainer.Id }
 if (-not $primaryProtectionContainerMapping) {
     Write-Output 'Protection Container mapping does not already exist. Creating protection container.' 
     $policy = Get-ASRPolicy -Name $policyName -ErrorAction SilentlyContinue
@@ -238,7 +239,15 @@ if (-not $primaryProtectionContainerMapping) {
     }
 
     $protectionContainerMappingName = $priContainer.Name + 'To' + $recContainer.Name
-    $job = New-ASRProtectionContainerMapping -Name $protectionContainerMappingName -Policy $policy -PrimaryProtectionContainer $priContainer -RecoveryProtectionContainer $recContainer
+    
+    $param = @{
+        Name                        = $protectionContainerMappingName
+        Policy                      = $policy
+        PrimaryProtectionContainer  = $priContainer
+        RecoveryProtectionContainer = $recContainer
+    }
+    $job = New-ASRProtectionContainerMapping @param
+
     do {
         Start-Sleep -Seconds 5
         $job = Get-ASRJob -Job $job
@@ -258,7 +267,9 @@ if (-not $primaryProtectionContainerMapping) {
     Write-Output "Created Primary Protection Container mappings: '$($primaryProtectionContainerMapping.Name)', Source '$($primaryProtectionContainerMapping.SourceFabricFriendlyName)' - Target '$($primaryProtectionContainerMapping.TargetFabricFriendlyName)'."
 }
 
-$reverseContainerMapping = Get-ASRProtectionContainerMapping -ProtectionContainer $recContainer | Where-Object { $_.TargetProtectionContainerId -like $priContainer.Id }
+$reverseContainerMapping = Get-ASRProtectionContainerMapping -ProtectionContainer $recContainer |
+    Where-Object { $_.TargetProtectionContainerId -like $priContainer.Id }
+
 if (-not $reverseContainerMapping) {
     Write-Output 'Reverse Protection container does not already exist. Creating Reverse protection container.' 
     if (-not $policy) {
@@ -326,15 +337,31 @@ foreach ($sourceVmArmId in $sourceVmARMIds) {
     Write-Output "Enable protection to be triggered for '$sourceVmArmId' using VM name '$vmName' as protected item ARM name."
     $diskList = New-Object System.Collections.ArrayList
 
-    $osDisk = New-AzRecoveryServicesAsrAzureToAzureDiskReplicationConfig -DiskId $Vm.StorageProfile.OsDisk.ManagedDisk.Id `
-        -LogStorageAccountId $PrimaryStagingStorageAccount -ManagedDisk -RecoveryReplicaDiskAccountType $RecoveryReplicaDiskAccountType `
-        -RecoveryResourceGroupId $TargetResourceGroupId -RecoveryTargetDiskAccountType $RecoveryTargetDiskAccountType          
+    $param = @{
+        DiskId                         = $Vm.StorageProfile.OsDisk.ManagedDisk.Id
+        LogStorageAccountId            = $PrimaryStagingStorageAccount
+        ManagedDisk                    = $true
+        RecoveryReplicaDiskAccountType = $RecoveryReplicaDiskAccountType
+        RecoveryResourceGroupId        = $TargetResourceGroupId
+        RecoveryTargetDiskAccountType  = $RecoveryTargetDiskAccountType
+    }
+    if ($vm.StorageProfile.OsDisk.ManagedDisk.DiskEncryptionSet)
+    {
+        $param.Add('RecoveryDiskEncryptionSetId', $vm.StorageProfile.OsDisk.ManagedDisk.DiskEncryptionSet.Id)
+    }
+    $osDisk = New-AzRecoveryServicesAsrAzureToAzureDiskReplicationConfig @param
     [void]$diskList.Add($osDisk)
 	
     foreach ($dataDisk in $script:AzureArtifactsInfo.Vm.StorageProfile.DataDisks) {
-        $disk = New-AzRecoveryServicesAsrAzureToAzureDiskReplicationConfig -DiskId $dataDisk.ManagedDisk.Id `
-            -LogStorageAccountId $PrimaryStagingStorageAccount -ManagedDisk -RecoveryReplicaDiskAccountType $RecoveryReplicaDiskAccountType `
-            -RecoveryResourceGroupId $TargetResourceGroupId -RecoveryTargetDiskAccountType $RecoveryTargetDiskAccountType
+        $param = @{
+            DiskId                         = $dataDisk.ManagedDisk.Id
+            LogStorageAccountId            = $PrimaryStagingStorageAccount
+            ManagedDisk                    = $true
+            RecoveryReplicaDiskAccountType = $RecoveryReplicaDiskAccountType
+            RecoveryResourceGroupId        = $TargetResourceGroupId
+            RecoveryTargetDiskAccountType  = $RecoveryTargetDiskAccountType
+        }
+        $disk = New-AzRecoveryServicesAsrAzureToAzureDiskReplicationConfig @param
         [void]$diskList.Add($disk)
     }
 	
@@ -345,9 +372,16 @@ foreach ($sourceVmArmId in $sourceVmARMIds) {
         $subscription = Set-AzContext -SubscriptionId $VaultSubscriptionId
     }
     
-    $job = New-ASRReplicationProtectedItem -Name $vmName -ProtectionContainerMapping $primaryProtectionContainerMapping `
-        -AzureVmId $vm.ID -AzureToAzureDiskReplicationConfiguration $diskList -RecoveryResourceGroupId $TargetResourceGroupId `
-        -RecoveryAzureNetworkId $TargetVirtualNetworkId -RecoveryAvailabilityZone $RecoveryAvailabilityZone
+    $param = @{
+        Name = $vmName
+        ProtectionContainerMapping               = $primaryProtectionContainerMapping
+        AzureVmId                                = $vm.ID
+        AzureToAzureDiskReplicationConfiguration = $diskList
+        RecoveryResourceGroupId                  = $TargetResourceGroupId
+        RecoveryAzureNetworkId                   = $TargetVirtualNetworkId
+        RecoveryAvailabilityZone                 = $RecoveryAvailabilityZone
+    }
+    $job = New-ASRReplicationProtectedItem @param
     [void]$enableReplicationJobs.Add($job)
 }
 
