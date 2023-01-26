@@ -364,7 +364,7 @@ foreach ($sourceVmArmId in $sourceVmARMIds) {
     $osDisk = New-AzRecoveryServicesAsrAzureToAzureDiskReplicationConfig @param
     [void]$diskList.Add($osDisk)
 	
-    foreach ($dataDisk in $script:AzureArtifactsInfo.Vm.StorageProfile.DataDisks) {
+    foreach ($dataDisk in $vm.StorageProfile.DataDisks) {
         $param = @{
             DiskId                         = $dataDisk.ManagedDisk.Id
             LogStorageAccountId            = $PrimaryStagingStorageAccount
